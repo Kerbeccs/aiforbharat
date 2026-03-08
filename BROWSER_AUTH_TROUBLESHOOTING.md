@@ -33,10 +33,7 @@ The browser-use library works better with IAM credentials than Bearer Token.
 # Comment out or remove Bearer Token
 # AWS_BEARER_TOKEN_BEDROCK=...
 
-# Keep IAM credentials
-AWS_ACCESS_KEY_ID=AKIA2LIP2HRK3IDS6GX4
-AWS_SECRET_ACCESS_KEY=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
-AWS_REGION=us-east-1
+
 ```
 
 Then update model to use standard Claude:
