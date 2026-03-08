@@ -1,0 +1,1 @@
+provider "aws" {}\n\nresource "aws_vpc" "main" {}\n\nresource "aws_subnet" "main" {}\n\nresource "aws_security_group" "allow_http" {}\n\nresource "aws_cloudwatch_metric_alarm" "example" {}\n

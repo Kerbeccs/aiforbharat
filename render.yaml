@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: devops-butler
+    runtime: python
+    buildCommand: pip install -r requirements.txt && playwright install chromium
+    startCommand: python -c "from ui.server import start_server; start_server(host='0.0.0.0', port=10000)"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_REGION
+        value: us-east-1
+      - key: AWS_BEARER_TOKEN_BEDROCK
+        sync: false
+      - key: BEDROCK_CLAUDE_SONNET_MODEL_ID
+        value: us.anthropic.claude-sonnet-4-6-20250514-v1:0
+      - key: BEDROCK_CLAUDE_HAIKU_MODEL_ID
+        value: amazon.nova-lite-v1:0
+      - key: BEDROCK_NOVA_PRO_MODEL_ID
+        value: amazon.nova-pro-v1:0
+      - key: BEDROCK_NOVA_LITE_MODEL_ID
+        value: amazon.nova-lite-v1:0
+      - key: BEDROCK_NOVA_ACT_MODEL_ID
+        value: amazon.nova-act-v1:0
+      - key: BEDROCK_TITAN_EMBED_MODEL_ID
+        value: amazon.titan-embed-text-v2:0
+      - key: AWS_CONSOLE_EMAIL
+        sync: false
+      - key: AWS_CONSOLE_PASSWORD
+        sync: false
+      - key: MONTHLY_BUDGET_USD
+        value: 100
+      - key: LOG_LEVEL
+        value: INFO
+      - key: ENABLE_BROWSER_AUTOMATION
+        value: true

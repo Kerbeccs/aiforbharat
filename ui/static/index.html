@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOps Butler — AI-Powered Deployment</title>
+    <meta name="description" content="AI-powered DevOps automation system that analyzes, plans, and deploys your code.">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-card: #1a2332;
+            --bg-card-hover: #1e2940;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.3);
+            --accent-secondary: #22d3ee;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-dim: #64748b;
+            --border: #1e293b;
+            --border-accent: rgba(59, 130, 246, 0.3);
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── Header ─────────────────────────────────────── */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 32px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(17, 24, 39, 0.8);
+            backdrop-filter: blur(16px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            color: white;
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 20px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .btn svg.spinning {
+            animation: spin 1s linear infinite;
+        }
+
+        /* ── Main Layout ────────────────────────────────── */
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* ── Upload Section ─────────────────────────────── */
+        .upload-section {
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+            margin-bottom: 12px;
+        }
+
+        .upload-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            transition: border-color 0.3s;
+        }
+
+        .upload-card:hover {
+            border-color: var(--border-accent);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover,
+        .upload-area.drag-over {
+            border-color: var(--accent);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .upload-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 12px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .upload-icon svg {
+            width: 32px;
+            height: 32px;
+            stroke: var(--accent);
+        }
+
+        .upload-text {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .upload-text strong {
+            color: var(--accent);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .input-field {
+            flex: 1;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .input-field::placeholder {
+            color: var(--text-dim);
+        }
+
+        textarea.input-field {
+            resize: vertical;
+            min-height: 60px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+        
+        .btn svg {
+            flex-shrink: 0;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #2563eb);
+            color: white;
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--accent-glow);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ── Pipeline Status ────────────────────────────── */
+        .pipeline {
+            display: none;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .pipeline.active {
+            display: block;
+        }
+
+        .pipeline-stages {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 4px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .stage {
+            padding: 12px 8px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 8px;
+            color: var(--text-dim);
+            transition: all 0.5s;
+            position: relative;
+        }
+
+        .stage.active {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent);
+            box-shadow: inset 0 0 0 1px var(--border-accent);
+        }
+
+        .stage.complete {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        .stage.error {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--error);
+        }
+
+        .stage-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 4px;
+        }
+        
+        .stage-icon svg {
+            stroke: currentColor;
+        }
+
+        /* ── Log Output ─────────────────────────────────── */
+        .log-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .log-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .log-content {
+            padding: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .log-line {
+            padding: 2px 0;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .log-time {
+            color: var(--text-dim);
+            margin-right: 8px;
+        }
+
+        .log-agent {
+            color: var(--accent);
+            font-weight: 500;
+            margin-right: 8px;
+        }
+
+        .log-msg {
+            color: var(--text-primary);
+        }
+
+        .log-msg.success {
+            color: var(--success);
+        }
+
+        .log-msg.error {
+            color: var(--error);
+        }
+
+        .log-msg.warning {
+            color: var(--warning);
+        }
+
+        /* ── Results Panel ──────────────────────────────── */
+        .results {
+            display: none;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .stat-value svg {
+            stroke: currentColor;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Approval Modal ─────────────────────────────── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border-accent);
+            border-radius: var(--radius);
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal h3 {
+            margin-bottom: 16px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        /* ── Responsive ─────────────────────────────────── */
+        @media (max-width: 768px) {
+            .main {
+                padding: 16px;
+            }
+
+            .pipeline-stages {
+                grid-template-columns: repeat(5, 1fr);
+                font-size: 10px;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-logo">
+            <span class="logo-icon">DB</span>
+            <span class="logo-text">DevOps Butler</span>
+        </div>
+        <div class="header-status">
+            <span class="status-dot"></span>
+            <span>System Online</span>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Upload Section -->
+        <section class="upload-section" id="uploadSection">
+            <div class="section-title">Deploy Your Application</div>
+            <div class="upload-card">
+                <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon">
+                        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                        </svg>
+                    </div>
+                    <div class="upload-text">
+                        <strong>Drop your code files here</strong> or click to browse<br>
+                        <small>Supports .zip, .py, .js, project folders</small>
+                    </div>
+                    <input type="file" id="fileInput" hidden accept=".zip,.tar,.gz,.py,.js,.ts,.java,.go">
+                </div>
+                <div class="input-group">
+                    <input type="text" class="input-field" id="codePath"
+                        placeholder="Or enter codebase path: /home/user/my-app">
+                </div>
+                <textarea class="input-field" id="userInput"
+                    placeholder="Instructions (optional): e.g., 'Deploy using Kubernetes with CI/CD pipeline' or 'Deploy on EC2 with RDS PostgreSQL'"
+                    rows="2"></textarea>
+                <div class="input-group" style="margin-top: 12px;">
+                    <button class="btn btn-primary" id="deployBtn" onclick="startDeploy()">
+                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Deploy
+                    </button>
+                </div>
+                <div id="fileInfo" style="color: var(--text-dim); font-size: 13px; margin-top: 8px;"></div>
+            </div>
+        </section>
+
+        <!-- Pipeline Progress -->
+        <section class="pipeline" id="pipeline">
+            <div class="section-title">Deployment Pipeline</div>
+            <div class="pipeline-stages">
+                <div class="stage" id="stage-analyze">
+                    <span class="stage-icon">
+                        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </span>
+                    Analyze
+                </div>
+                <div class="stage" id="stage-plan">
+                    <span class="stage-icon">
+                        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                    </span>
+                    Plan
+                </div>
+                <div class="stage" id="stage-execute">
+                    <span class="stage-icon">
+                        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </span>
+                    Execute
+                </div>
+                <div class="stage" id="stage-browser">
+                    <span class="stage-icon">
+                        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                        </svg>
+                    </span>
+                    Browser
+                </div>
+                <div class="stage" id="stage-monitor">
+                    <span class="stage-icon">
+                        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </span>
+                    Monitor
+                </div>
+            </div>
+
+            <div class="log-panel">
+                <div class="log-header">
+                    <span>Live Output</span>
+                    <span id="logCount">0 events</span>
+                </div>
+                <div class="log-content" id="logContent">
+                    <div class="log-line">
+                        <span class="log-time">--:--:--</span>
+                        <span class="log-agent">[butler]</span>
+                        <span class="log-msg">Waiting for deployment...</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results -->
+        <section class="results" id="results">
+            <div class="section-title">Deployment Report</div>
+            <div class="result-grid" id="resultGrid"></div>
+            <div class="log-panel">
+                <div class="log-header">
+                    <span>Final Report</span>
+                </div>
+                <div class="log-content" id="reportContent" style="white-space: pre-wrap;"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Approval Modal -->
+    <div class="modal-overlay" id="approvalModal">
+        <div class="modal">
+            <h3>Deployment Plan Approval</h3>
+            <div id="approvalContent"></div>
+            <div class="modal-actions">
+                <button class="btn btn-success" onclick="approvePlan()">Approve</button>
+                <button class="btn btn-outline" onclick="rejectPlan()">Reject</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let deploymentId = null;
+        let logCount = 0;
+        let uploadedFile = null;
+
+        // ── File Upload ────────────────────────────────────
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            if (e.dataTransfer.files.length) {
+                uploadedFile = e.dataTransfer.files[0];
+                document.getElementById('fileInfo').textContent = `${uploadedFile.name} (${formatSize(uploadedFile.size)})`;
+            }
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                uploadedFile = e.target.files[0];
+                document.getElementById('fileInfo').textContent = `${uploadedFile.name} (${formatSize(uploadedFile.size)})`;
+            }
+        });
+
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        // ── Deploy ─────────────────────────────────────────
+        async function startDeploy() {
+            const codePath = document.getElementById('codePath').value;
+            const userInput = document.getElementById('userInput').value;
+
+            if (!codePath && !uploadedFile) {
+                alert('Please provide a codebase path or upload a file.');
+                return;
+            }
+
+            const btn = document.getElementById('deployBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<svg class="spinning" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.25"/><path stroke-linecap="round" d="M12 2a10 10 0 0110 10"/></svg> Starting...';
+            btn.style.opacity = '0.7';
+
+            const formData = new FormData();
+            formData.append('user_input', userInput || 'deploy');
+            formData.append('codebase_path', codePath);
+            if (uploadedFile) {
+                formData.append('file', uploadedFile);
+            }
+
+            try {
+                const resp = await fetch('/api/deploy', { method: 'POST', body: formData });
+                const data = await resp.json();
+                deploymentId = data.deployment_id;
+
+                // Show pipeline
+                document.getElementById('pipeline').classList.add('active');
+                addLog('orchestrator', 'Deployment started: ' + deploymentId);
+
+                // Connect WebSocket
+                connectWS(deploymentId);
+
+                // Simulate pipeline stages
+                setStage('analyze', 'active');
+
+            } catch (err) {
+                alert('Failed to start deployment: ' + err.message);
+                btn.disabled = false;
+                btn.innerHTML = '<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg> Deploy';
+                btn.style.opacity = '1';
+            }
+        }
+
+        // ── WebSocket ──────────────────────────────────────
+        function connectWS(id) {
+            const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            ws = new WebSocket(`${protocol}//${location.host}/ws/${id}`);
+
+            ws.onmessage = (event) => {
+                const msg = JSON.parse(event.data);
+                handleWSMessage(msg);
+            };
+            ws.onerror = () => addLog('system', 'WebSocket error', 'error');
+            ws.onclose = () => addLog('system', 'Connection closed');
+        }
+
+        function handleWSMessage(msg) {
+            switch (msg.type) {
+                case 'status':
+                    addLog(msg.agent || 'butler', msg.message);
+                    updateStage(msg.agent);
+                    break;
+                case 'approval_required':
+                    addLog('planner', msg.message, 'warning');
+                    showApproval(msg);
+                    setStage('plan', 'complete');
+                    break;
+                case 'approval_needed':
+                    addLog('planner', msg.message, 'warning');
+                    showApproval(msg);
+                    break;
+                case 'complete':
+                    showResults(msg.report, msg.message);
+                    break;
+                case 'error':
+                    addLog('error', msg.message, 'error');
+                    showResults({ status: 'failed', errors: [msg.message] }, msg.message);
+                    break;
+            }
+        }
+
+        // ── Logging ────────────────────────────────────────
+        function addLog(agent, message, type = '') {
+            const log = document.getElementById('logContent');
+            const now = new Date().toLocaleTimeString();
+            const line = document.createElement('div');
+            line.className = 'log-line';
+            line.innerHTML = `<span class="log-time">${now}</span><span class="log-agent">[${agent}]</span><span class="log-msg ${type}">${message}</span>`;
+            log.appendChild(line);
+            log.scrollTop = log.scrollHeight;
+            logCount++;
+            document.getElementById('logCount').textContent = logCount + ' events';
+        }
+
+        // ── Pipeline Stages ────────────────────────────────
+        function setStage(name, state) {
+            const el = document.getElementById('stage-' + name);
+            if (el) {
+                el.className = 'stage ' + state;
+            }
+        }
+        function updateStage(agent) {
+            const map = {
+                'code_analyzer': 'analyze',
+                'master_planner': 'plan',
+                'executor': 'execute',
+                'browser_agent': 'browser',
+                'monitor': 'monitor',
+            };
+            const stage = map[agent];
+            if (stage) {
+                // Complete previous stages
+                const order = ['analyze', 'plan', 'execute', 'browser', 'monitor'];
+                const idx = order.indexOf(stage);
+                for (let i = 0; i < idx; i++) setStage(order[i], 'complete');
+                setStage(stage, 'active');
+            }
+        }
+
+        // ── Approval ───────────────────────────────────────
+        function showApproval(msg) {
+            const plan = msg.plan || {};
+            const content = `
+                <div style="margin-bottom: 16px; color: var(--text-secondary); line-height: 1.8;">
+                    <p><strong>Strategy:</strong> ${plan.strategy || 'N/A'}</p>
+                    <p><strong>Estimated Cost:</strong> $${(plan.estimated_cost || 0).toFixed(2)}/month</p>
+                    <p><strong>Tasks:</strong> ${plan.tasks || 0} deployment tasks</p>
+                    <p><strong>Skills:</strong> ${(plan.skills || []).join(', ') || 'N/A'}</p>
+                    <p><strong>AWS Services:</strong> ${(plan.services || []).join(', ') || 'N/A'}</p>
+                </div>
+                <p style="color: var(--warning); display: flex; align-items: center; gap: 8px;">
+                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    Cost exceeds budget. Approve to continue.
+                </p>
+            `;
+            document.getElementById('approvalContent').innerHTML = content;
+            document.getElementById('approvalModal').classList.add('active');
+        }
+        function approvePlan() {
+            // Send approval via WebSocket
+            if (ws) ws.send(JSON.stringify({ type: 'approve' }));
+            // Also send via REST API as backup
+            if (deploymentId) {
+                fetch(`/api/deploy/${deploymentId}/approve`, { method: 'POST' });
+            }
+            document.getElementById('approvalModal').classList.remove('active');
+            addLog('user', 'Plan approved', 'success');
+            setStage('execute', 'active');
+        }
+        function rejectPlan() {
+            document.getElementById('approvalModal').classList.remove('active');
+            addLog('user', 'Plan rejected', 'error');
+        }
+
+        // ── Results ────────────────────────────────────────
+        function showResults(report, message) {
+            const results = document.getElementById('results');
+            results.classList.add('active');
+
+            // Complete all stages
+            ['analyze', 'plan', 'execute', 'browser', 'monitor'].forEach(s => {
+                setStage(s, report?.status === 'failed' ? 'error' : 'complete');
+            });
+
+            const summary = report?.summary || {};
+            const grid = document.getElementById('resultGrid');
+            const statusIcon = report?.status === 'success' 
+                ? '<svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
+                : '<svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+            grid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value" style="color: ${report?.status === 'success' ? 'var(--success)' : 'var(--error)'}">
+                        ${statusIcon}
+                    </div>
+                    <div class="stat-label">${report?.status || 'unknown'}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${summary.tasks_succeeded || 0}/${summary.tasks_total || 0}</div>
+                    <div class="stat-label">Tasks Succeeded</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">$${(summary.estimated_cost || 0).toFixed(2)}</div>
+                    <div class="stat-label">Monthly Cost</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${(summary.skills_used || []).length}</div>
+                    <div class="stat-label">Skills Used</div>
+                </div>
+            `;
+
+            document.getElementById('reportContent').textContent = message || JSON.stringify(report, null, 2);
+
+            // Fetch generated files
+            if (deploymentId) {
+                fetch(`/api/deploy/${deploymentId}/files`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.files && data.files.length > 0) {
+                            showGeneratedFiles(data.files);
+                        }
+                    })
+                    .catch(() => { });
+            }
+
+            const btn = document.getElementById('deployBtn');
+            btn.disabled = false;
+            btn.innerHTML = '<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg> Deploy Again';
+            btn.style.opacity = '1';
+        }
+
+        function showGeneratedFiles(files) {
+            const container = document.createElement('div');
+            container.className = 'log-panel';
+            container.style.marginTop = '16px';
+
+            let html = `
+                <div class="log-header">
+                    <span>Generated Deployment Files</span>
+                    <span>${files.length} files</span>
+                </div>
+                <div style="padding: 12px;">
+            `;
+
+            for (const file of files) {
+                const ext = file.path.split('.').pop();
+                const iconSvg = '<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>';
+
+                html += `
+                    <details style="margin-bottom: 8px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden;">
+                        <summary style="padding: 10px 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; background: var(--bg-secondary); font-size: 13px; font-weight: 500;">
+                            ${iconSvg}
+                            <span style="flex: 1; font-family: 'JetBrains Mono', monospace;">${file.path}</span>
+                            <span style="color: var(--text-dim); font-size: 11px;">${file.size} bytes</span>
+                        </summary>
+                        <pre style="margin: 0; padding: 12px 16px; background: var(--bg-primary); font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.6; overflow-x: auto; color: var(--text-secondary);">${escapeHtml(file.content)}</pre>
+                    </details>
+                `;
+            }
+
+            html += '</div>';
+            container.innerHTML = html;
+            document.getElementById('results').appendChild(container);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+
+</html>

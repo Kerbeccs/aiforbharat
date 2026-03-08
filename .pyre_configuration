@@ -1,0 +1,7 @@
+{
+    "source_directories": ["."],
+    "search_path": ["."],
+    "site_package_search_strategy": "pep561",
+    "site_roots": ["venv/Lib/site-packages"],
+    "exclude": ["venv", ".git", "__pycache__"]
+}

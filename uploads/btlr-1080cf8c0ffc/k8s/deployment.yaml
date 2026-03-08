@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-django-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: flask-django
+  template:
+    metadata:
+      labels:
+        app: flask-django
+    spec:
+      containers:
+      - name: flask-django-container
+        image: {IMAGE_URI}
+        ports:
+        - containerPort: 5000
+          name: http
+        resources:
+          limits:
+            cpu: "1"
+            memory: 512Mi
+          requests:
+            cpu: "0.5"
+            memory: 256Mi
+        command: ["python", "app.py"]
+      restartPolicy: Always

@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-django-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: flask-django
+  template:
+    metadata:
+      labels:
+        app: flask-django
+    spec:
+      containers:
+      - name: flask-django
+        image: {IMAGE_URI}
+        ports:
+        - containerPort: 5000
